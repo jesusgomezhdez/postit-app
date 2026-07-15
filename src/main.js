@@ -11,7 +11,7 @@ const statusEl = document.getElementById('status');
 
 const DEBOUNCE_MS = 400;
 let debounceTimer = null;
-let suppressNextInput = false;
+let lastKnownServerContent = '';
 
 function setStatus(text) {
   statusEl.textContent = text;
@@ -35,8 +35,8 @@ async function ensurePostitId() {
 }
 
 function applyRemoteContent(content) {
+  lastKnownServerContent = content;
   if (content === textarea.value) return;
-  suppressNextInput = true;
   textarea.value = content;
 }
 
@@ -61,7 +61,13 @@ function subscribeToChanges(id) {
     .on(
       'postgres_changes',
       { event: 'UPDATE', schema: 'public', table: 'postits', filter: `id=eq.${id}` },
-      (payload) => applyRemoteContent(payload.new.content ?? ''),
+      (payload) => {
+        const incoming = payload.new.content ?? '';
+        // Eco de un guardado propio ya reflejado localmente: ignorar para no
+        // pisar texto más nuevo que el usuario haya escrito mientras viajaba.
+        if (incoming === lastKnownServerContent) return;
+        applyRemoteContent(incoming);
+      },
     )
     .subscribe((state) => {
       if (state === 'SUBSCRIBED') setStatus('Conectado');
@@ -70,6 +76,7 @@ function subscribeToChanges(id) {
 }
 
 function saveContent(id, content) {
+  lastKnownServerContent = content;
   supabase.from('postits').update({ content }).eq('id', id).then(({ error }) => {
     if (error) setStatus('Error al guardar');
   });
@@ -83,10 +90,6 @@ async function init() {
   subscribeToChanges(id);
 
   textarea.addEventListener('input', () => {
-    if (suppressNextInput) {
-      suppressNextInput = false;
-      return;
-    }
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => saveContent(id, textarea.value), DEBOUNCE_MS);
   });
