@@ -6,6 +6,7 @@ Un post-it virtual compartible por enlace, con edición en tiempo real vía Supa
 
 1. Crea un proyecto en [supabase.com](https://supabase.com) (free tier).
 2. Ve a **SQL Editor** y ejecuta el contenido de [`schema.sql`](schema.sql). Esto crea la tabla `postits`, sus políticas RLS y habilita Realtime sobre ella.
+   - Si ya tenías el proyecto creado antes de la función de "múltiples post-its", **no vuelvas a correr todo el archivo** (fallaría en el `create table`): ejecuta solo el bloque final, desde el comentario `-- Migración: post-its múltiples...` en adelante. Es seguro de correr sobre datos existentes.
 3. Ve a **Project Settings → API** y copia:
    - `Project URL`
    - `anon public` key
@@ -52,7 +53,10 @@ Esto genera una carpeta `dist/` 100% estática, desplegable en cualquier hosting
 
 ## Cómo funciona
 
-- Cada post-it es una fila en la tabla `postits`, identificada por un `uuid` que forma parte de la URL (`/?id=<uuid>`).
+- Un enlace (`/?board=<uuid>`) representa un **tablero**, que puede tener hasta 10 post-its. Cada post-it es una fila en la tabla `postits`, agrupada por `board_id`.
+- Al entrar sin `?board=` se crea un tablero nuevo con un único post-it y se redirige a su enlace. El botón "+ Añadir post-it" agrega más notas al mismo tablero (hasta el máximo de 10, reforzado también en la base de datos).
+- Cada post-it tiene su propio color, elegible desde la franja de swatches en su toolbar.
 - Al escribir, el contenido se guarda con un debounce de ~400ms.
-- Los demás clientes con el mismo `id` reciben el cambio al instante vía Supabase Realtime (`postgres_changes`).
-- El botón "Borrar" vacía el contenido de la nota sin eliminar la fila, así el enlace se mantiene válido.
+- Los demás clientes con el mismo `board_id` reciben los cambios (contenido, color, notas nuevas) al instante vía Supabase Realtime (`postgres_changes`).
+- El botón "Borrar" vacía el contenido de una nota sin eliminar la fila, así el enlace se mantiene válido.
+- Enlaces antiguos con `?id=<uuid>` (de antes de esta migración) siguen funcionando: el frontend los acepta como fallback de `board`.

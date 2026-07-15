@@ -9,14 +9,32 @@
   </head>
   <body>
     <main class="stage">
-      <div class="postit">
-        <textarea id="content" placeholder="Escribe algo…" maxlength="5000"></textarea>
-        <div class="toolbar">
-          <span id="status" class="status"></span>
-          <button id="clear" type="button">Borrar</button>
-        </div>
+      <div class="board-wrap">
+        <div id="board" class="board"></div>
+        <button id="add-postit" type="button" class="add-postit">
+          + Añadir post-it <span id="postit-count" class="postit-count"></span>
+        </button>
       </div>
     </main>
+
+    <template id="postit-template">
+      <div class="postit">
+        <textarea class="content" placeholder="Escribe algo…" maxlength="5000"></textarea>
+        <div class="toolbar">
+          <div class="colors">
+            <button type="button" class="swatch" data-color="yellow" title="Amarillo"></button>
+            <button type="button" class="swatch" data-color="pink" title="Rosa"></button>
+            <button type="button" class="swatch" data-color="blue" title="Azul"></button>
+            <button type="button" class="swatch" data-color="green" title="Verde"></button>
+            <button type="button" class="swatch" data-color="orange" title="Naranja"></button>
+            <button type="button" class="swatch" data-color="purple" title="Morado"></button>
+          </div>
+          <span class="status"></span>
+          <button type="button" class="clear">Borrar</button>
+        </div>
+      </div>
+    </template>
+
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>
