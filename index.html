@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Post-it</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <main class="stage">
+      <div class="postit">
+        <textarea id="content" placeholder="Escribe algo…" maxlength="5000"></textarea>
+        <div class="toolbar">
+          <span id="status" class="status"></span>
+          <button id="clear" type="button">Borrar</button>
+        </div>
+      </div>
+    </main>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
